@@ -1,0 +1,13 @@
+import { Mafs, Coordinates } from "mafs"
+import "mafs/core.css";
+import "mafs/font.css";
+function HelloFx() {
+  return (
+    <Mafs>
+      <Coordinates.Cartesian />
+    </Mafs>
+  )
+}
+export default HelloFx
+
+
