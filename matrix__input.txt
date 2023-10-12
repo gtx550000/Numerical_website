@@ -1,0 +1,97 @@
+import React, { useState } from "react";
+
+const GaussianElimination = () => {
+  const [n, setN] = useState(3);
+  const [matrix, setMatrix] = useState([]);
+  const [x, setX] = useState([]);
+
+  const initializeMatrix = () => {
+    const newMatrix = [];
+    for (let i = 0; i < n; i++) {
+      const row = [];
+      for (let j = 0; j <= n; j++) {
+        row.push(0);
+      }
+      newMatrix.push(row);
+    }
+    setMatrix(newMatrix);
+  };
+
+  const handleInputChange = (e, i, j) => {
+    const newMatrix = [...matrix];
+    newMatrix[i][j] = parseFloat(e.target.value);
+    setMatrix(newMatrix);
+  };
+
+  const calculateResult = () => {
+    // Perform Gaussian Elimination
+    for (let i = 0; i < n; i++) {
+      // Divide the leading term by its coefficient
+      matrix[i][i] /= matrix[i][i];
+
+      // Eliminate the leading term in the following rows
+      for (let j = i + 1; j < n; j++) {
+        matrix[j][i] /= matrix[i][i];
+        for (let k = i + 1; k <= n; k++) {
+          matrix[j][k] -= matrix[j][i] * matrix[i][k];
+        }
+      }
+    }
+
+    // Back-substitution
+    for (let i = n - 1; i >= 0; i--) {
+      x[i] = matrix[i][n];
+      for (let j = i + 1; j < n; j++) {
+        x[i] -= matrix[i][j] * x[j];
+      }
+    }
+  };
+
+  const renderMatrix = () => {
+    const matrixRows = [];
+    for (let i = 0; i < n; i++) {
+      const row = [];
+      for (let j = 0; j <= n; j++) {
+        row.push(
+          <input
+            key={`${i}-${j}`}
+            value={matrix[i][j]}
+            onChange={(e) => handleInputChange(e, i, j)}
+          />
+        );
+      }
+      matrixRows.push(<div key={i} className="row">{row}</div>);
+    }
+    return matrixRows;
+  };
+
+  return (
+    <div>
+      <h1>Gaussian Elimination</h1>
+      <div>
+        <label>
+          n:
+          <input
+            type="number"
+            value={n}
+            onChange={(e) => setN(parseInt(e.target.value))}
+          />
+        </label>
+      </div>
+      <div className="matrix">
+        {renderMatrix()}
+      </div>
+      <button onClick={calculateResult}>Calculate</button>
+      <div>
+        <h2>Results</h2>
+        <ul>
+          {x.map((value, i) => (
+            <li key={i}>x{i} = {value}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default GaussianElimination;
