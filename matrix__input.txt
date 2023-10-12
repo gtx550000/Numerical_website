@@ -1,80 +1,84 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-const GaussianElimination = () => {
-  const [n, setN] = useState(3);
-  const [matrix, setMatrix] = useState([]);
-  const [x, setX] = useState([]);
+const Matrix = () => {
+  const [rows, setRows] = useState(3);
+  const [cols, setCols] = useState(3);
+  const [matrixValues, setMatrixValues] = useState([]);
+  const [result, setResult] = useState(0);
 
-  const initializeMatrix = () => {
-    const newMatrix = [];
-    for (let i = 0; i < n; i++) {
+  const handleRowsChange = (e) => {
+    const newRows = parseInt(e.target.value, 10);
+    setRows(newRows);
+    initializeMatrixValues(newRows, cols);
+  };
+
+  const handleColsChange = (e) => {
+    const newCols = parseInt(e.target.value, 10);
+    setCols(newCols);
+    initializeMatrixValues(rows, newCols);
+  };
+
+  const initializeMatrixValues = (newRows, newCols) => {
+    const newMatrixValues = [];
+    for (let i = 0; i < newRows; i++) {
       const row = [];
-      for (let j = 0; j <= n; j++) {
-        row.push(0);
+      for (let j = 0; j < newCols; j++) {
+        row.push('');
       }
-      newMatrix.push(row);
+      newMatrixValues.push(row);
     }
-    setMatrix(newMatrix);
+    setMatrixValues(newMatrixValues);
   };
 
   const handleInputChange = (e, i, j) => {
-    const newMatrix = [...matrix];
-    newMatrix[i][j] = parseFloat(e.target.value);
-    setMatrix(newMatrix);
+    const newValues = [...matrixValues];
+    // เพิ่มการตรวจสอบว่าค่าที่ป้อนเข้ามาเป็นตัวเลขหรือไม่
+    if (isNaN(e.target.value)) {
+      return;
+    }
+    newValues[i][j] = e.target.value;
+    setMatrixValues(newValues);
   };
 
   const calculateResult = () => {
-    // Perform Gaussian Elimination
-    for (let i = 0; i < n; i++) {
-      // Divide the leading term by its coefficient
-      matrix[i][i] /= matrix[i][i];
-
-      // Eliminate the leading term in the following rows
-      for (let j = i + 1; j < n; j++) {
-        matrix[j][i] /= matrix[i][i];
-        for (let k = i + 1; k <= n; k++) {
-          matrix[j][k] -= matrix[j][i] * matrix[i][k];
-        }
-      }
-    }
-
-    // Back-substitution
-    for (let i = n - 1; i >= 0; i--) {
-      x[i] = matrix[i][n];
-      for (let j = i + 1; j < n; j++) {
-        x[i] -= matrix[i][j] * x[j];
-      }
-    }
+    // ใช้ Array.prototype.reduce() เพื่อคำนวณผลรวมของค่าทั้งหมดในเมทริกซ์
+    const result = matrixValues.flat().reduce((acc, curr) => acc + curr, 0);
+    setResult(result);
   };
 
   const renderMatrix = () => {
-    const matrixRows = [];
-    for (let i = 0; i < n; i++) {
-      const row = [];
-      for (let j = 0; j <= n; j++) {
-        row.push(
+    // ใช้ Array.prototype.flatMap() เพื่อสร้างเมทริกซ์
+    const matrix = matrixValues.flatMap((row, i) => (
+      <div key={i} className="row">
+        {row.map((value, j) => (
           <input
             key={`${i}-${j}`}
-            value={matrix[i][j]}
+            value={value}
             onChange={(e) => handleInputChange(e, i, j)}
           />
-        );
-      }
-      matrixRows.push(<div key={i} className="row">{row}</div>);
-    }
-    return matrixRows;
+        ))}
+      </div>
+    ));
+    return matrix;
   };
 
   return (
     <div>
-      <h1>Gaussian Elimination</h1>
       <div>
         <label>
-          n:
+          Rows:
           <input
             type="number"
-            value={n}
-            onChange={(e) => setN(parseInt(e.target.value))}
+            value={rows}
+            onChange={handleRowsChange}
+          />
+        </label>
+        <label>
+          Columns:
+          <input
+            type="number"
+            value={cols}
+            onChange={handleColsChange}
           />
         </label>
       </div>
@@ -83,15 +87,11 @@ const GaussianElimination = () => {
       </div>
       <button onClick={calculateResult}>Calculate</button>
       <div>
-        <h2>Results</h2>
-        <ul>
-          {x.map((value, i) => (
-            <li key={i}>x{i} = {value}</li>
-          ))}
-        </ul>
+        Result: {result}
       </div>
     </div>
   );
 };
 
-export default GaussianElimination;
+export default Matrix;
+
