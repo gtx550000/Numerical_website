@@ -1,0 +1,85 @@
+import React, { useState } from 'react';
+
+function MatrixInput() {
+  const [dimension, setDimension] = useState(2);
+  const [matrix, setMatrix] = useState(Array.from({ length: dimension }, () => Array(dimension + 1).fill(0)));
+  const [answer, setAnswer] = useState([]);
+  const [currentIteration, setCurrentIteration] = useState(0);
+
+  const handleDimensionChange = (e) => {
+    const newDimension = parseInt(e.target.value, 10);
+    setDimension(newDimension);
+    setMatrix(Array.from({ length: newDimension }, () => Array(newDimension + 1).fill(0)));
+  };
+
+  const handleMatrixChange = (e, rowIndex, colIndex) => {
+    const newValue = parseFloat(e.target.value);
+    const newMatrix = [...matrix];
+    newMatrix[rowIndex][colIndex] = newValue;
+    setMatrix(newMatrix);
+  };
+
+  const jacobiIteration = (maxIterations = 1000, tolerance = 0.0001) => {
+    const n = matrix.length;
+    let currentGuess = Array(n).fill(0);
+    for (let iteration = 0; iteration < maxIterations; iteration++) {
+      const nextGuess = [...currentGuess];
+      for (let i = 0; i < n; i++) {
+        let sum = matrix[i][n]; // b[i]
+        for (let j = 0; j < n; j++) {
+          if (i !== j) {
+            sum -= matrix[i][j] * currentGuess[j];
+          }
+        }
+        nextGuess[i] = sum / matrix[i][i];
+      }
+
+      let error = 0;
+      for (let i = 0; i < n; i++) {
+        error += Math.abs(nextGuess[i] - currentGuess[i]);
+      }
+
+      if (error < tolerance) {
+        setCurrentIteration(iteration + 1); // Update the iteration count when solution is found
+        return nextGuess;
+      }
+
+      currentGuess = nextGuess;
+    }
+    setCurrentIteration(maxIterations); 
+    return currentGuess; // might not be converged to the actual answer
+};
+
+  const calculate = () => {
+    const results = jacobiIteration();
+    setAnswer(results);
+  };
+
+  return (
+    <div>
+      <h2>Dimension</h2>
+      <input type="number" min="2" value={dimension} onChange={handleDimensionChange} />
+
+      <div>
+        <h3>Enter Matrix Values:</h3>
+        {matrix.map((row, rowIndex) => (
+          <div key={rowIndex}>
+            {row.map((value, colIndex) => (
+              <input
+                key={colIndex}
+                type="number"
+                value={value}
+                onChange={(e) => handleMatrixChange(e, rowIndex, colIndex)}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      <button onClick={calculate}>Calculate </button>
+      <h3>Iterations taken: {currentIteration}</h3> 
+      {answer.map((value, index) => (<p key={index}>x{index}: {value.toFixed(4)}</p>))}
+    </div>
+  );
+}
+
+export default MatrixInput;
